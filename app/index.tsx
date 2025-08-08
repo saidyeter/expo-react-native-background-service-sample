@@ -1,6 +1,25 @@
-import { Button, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 import BackgroundService from 'react-native-background-actions';
 const myURL = 'https://3126109b333a.ngrok-free.app'
+
+export default function Index() {
+  return (
+    <View style={styles.container}>
+      <Text>Background Service Sample App</Text>
+      <Button title="Start Task" onPress={handleStart} />
+      <Button title="Stop Task" onPress={handleStop} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20
+  },
+});
 
 export async function ping(num: number) {
   await fetch(myURL + "/ping")
@@ -10,7 +29,7 @@ export async function ping(num: number) {
     })
 }
 
-
+/* Below example is taken from https://github.com/Rapsssito/react-native-background-actions */
 const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
 
 // You can do anything in your task such as network requests, timers and so on,
@@ -20,17 +39,18 @@ const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, tim
 const veryIntensiveTask = async (taskDataArguments: { delay: number } & any) => {
   // Example of an infinite loop task
   const { delay } = taskDataArguments;
-  await new Promise(async (resolve) => {
+  await new Promise(async () => {
     for (let i = 0; BackgroundService.isRunning(); i++) {
       ping(i);
       await sleep(delay);
     }
   });
 };
+
 const options = {
-  taskName: 'Example',
-  taskTitle: 'ExampleTask title',
-  taskDesc: 'ExampleTask description',
+  taskName: 'Background Service Sample App',
+  taskTitle: 'Background Service Sample App Task Title',
+  taskDesc: 'Background Service Sample App Task Description',
   taskIcon: {
     name: 'ic_launcher',
     type: 'mipmap',
@@ -42,47 +62,18 @@ const options = {
   },
 };
 
+function handleStart() {
+  try {
+    BackgroundService.start(veryIntensiveTask, options);
+  } catch (error) {
+    console.log('error starting task', error);
+  }
+}
 
-
-
-export default function Index() {
-  // useEffect(() => {
-  //   if (!BackgroundService.isRunning()) {
-  //     BackgroundService.start(veryIntensiveTask, options);
-  //   }
-  // }, []);
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-      <Button
-        title="Start Task"
-        onPress={() => {
-          try {
-            BackgroundService.start(veryIntensiveTask, options);
-          } catch (error) {
-            console.log('error starting task', error);
-
-          }
-        }}
-      />
-      <Button
-        title="Stop Task"
-        onPress={() => {
-          try {
-            BackgroundService.stop();
-          } catch (error) {
-            console.log('error stopping task', error);
-
-          }
-        }}
-      />
-    </View>
-  );
+function handleStop() {
+  try {
+    BackgroundService.stop();
+  } catch (error) {
+    console.log('error stopping task', error);
+  }
 }
